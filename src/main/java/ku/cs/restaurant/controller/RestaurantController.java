@@ -20,12 +20,12 @@ public class RestaurantController {
         this.service = service;
     }
 
-    @GetMapping("/restaurant")
+    @GetMapping("/restaurants")
     public List<Restaurant> getAllRestaurants() {
         return service.getAll();
     }
 
-    @PostMapping("/restaurant")
+    @PostMapping("/restaurants")
     public Restaurant save(@RequestBody Restaurant restaurant) {
         return service.create(restaurant);
     }
