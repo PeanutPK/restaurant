@@ -28,6 +28,16 @@ public class RestaurantController {
         return service.getRestaurantById(id);
     }
 
+    @GetMapping("/restaurants/name/{name}")
+    public Restaurant getRestaurantByName(@PathVariable String name) {
+        return service.getRestaurantByName(name);
+    }
+
+    @GetMapping("/restaurants/location/{location}")
+    public List<Restaurant> getRestaurantsByLocation(@PathVariable String location) {
+        return service.getRestaurantByLocation(location);
+    }
+
     @PostMapping("/restaurants")
     public Restaurant save(@RequestBody Restaurant restaurant) {
         return service.create(restaurant);
@@ -36,5 +46,10 @@ public class RestaurantController {
     @PutMapping("/restaurants")
     public Restaurant update(@RequestBody Restaurant restaurant) {
         return service.update(restaurant);
+    }
+
+    @DeleteMapping("/restaurants/{id}")
+    public Restaurant delete(@PathVariable UUID id) {
+        return service.delete(id);
     }
 }

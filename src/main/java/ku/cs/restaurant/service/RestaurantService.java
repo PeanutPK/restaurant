@@ -26,6 +26,14 @@ public class RestaurantService {
         return repository.findById(id).get();
     }
 
+    public Restaurant getRestaurantByName(String name) {
+        return repository.findByName(name);
+    }
+
+    public List<Restaurant> getRestaurantByLocation(String location) {
+        return repository.findByLocation(location);
+    }
+
     public Restaurant create(Restaurant restaurant) {
         restaurant.setCreatedAt(Instant.now());
         return repository.save(restaurant);
@@ -39,6 +47,12 @@ public class RestaurantService {
         record.setLocation(restaurant.getLocation());
 
         record = repository.save(record);
+        return record;
+    }
+
+    public Restaurant delete(UUID id) {
+        Restaurant record = repository.findById(id).get();
+        repository.deleteById(id);
         return record;
     }
 }
