@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class RestaurantService {
@@ -21,8 +22,23 @@ public class RestaurantService {
         return repository.findAll();
     }
 
+    public Restaurant getRestaurantById(UUID id) {
+        return repository.findById(id).get();
+    }
+
     public Restaurant create(Restaurant restaurant) {
         restaurant.setCreatedAt(Instant.now());
         return repository.save(restaurant);
+    }
+
+    public Restaurant update(Restaurant restaurant) {
+        UUID id = restaurant.getId();
+        Restaurant record = repository.findById(id).get();
+        record.setName(restaurant.getName());
+        record.setRating(restaurant.getRating());
+        record.setLocation(restaurant.getLocation());
+
+        record = repository.save(record);
+        return record;
     }
 }
