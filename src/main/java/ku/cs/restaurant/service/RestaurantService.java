@@ -1,9 +1,13 @@
 package ku.cs.restaurant.service;
 
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import ku.cs.restaurant.dto.RestaurantRequest;
 import ku.cs.restaurant.entity.Restaurant;
 import ku.cs.restaurant.repository.RestaurantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -19,16 +23,18 @@ public class RestaurantService {
         this.repository = repository;
     }
 
-    public List<Restaurant> getAll() {
-        return repository.findAll();
+    public Page<Restaurant> getRestaurantsPage(PageRequest pageRequest) {
+        return repository.findAll(pageRequest);
     }
 
     public Restaurant getRestaurantById(UUID id) {
-        return repository.findById(id).get();
+        return repository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException("Restaurant not found"));
     }
 
     public Restaurant getRestaurantByName(String name) {
-        return repository.findByName(name);
+        return repository.findByName(name).orElseThrow(() ->
+                new EntityNotFoundException("Restaurant not found"));
     }
 
     public List<Restaurant> getRestaurantByLocation(String location) {
@@ -36,6 +42,8 @@ public class RestaurantService {
     }
 
     public Restaurant create(RestaurantRequest request) {
+        if (repository.existsByName(request.getName()))
+            throw new EntityExistsException("Restaurant name already exists");
         Restaurant dao = new Restaurant();
         dao.setName(request.getName());
         dao.setRating(request.getRating());
