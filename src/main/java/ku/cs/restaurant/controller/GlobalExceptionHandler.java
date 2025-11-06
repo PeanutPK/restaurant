@@ -1,6 +1,9 @@
 package ku.cs.restaurant.controller;
 
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
@@ -43,5 +46,21 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleEntityNotFoundExceptions(
             EntityNotFoundException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+
+    @ExceptionHandler({
+            SecurityException.class,
+            MalformedJwtException.class,
+            ExpiredJwtException.class,
+            UnsupportedJwtException.class,
+            IllegalArgumentException.class
+    })
+    public ResponseEntity<?> handleJwtExceptions(Exception ex) {
+        logger.error("JWT Error: {}", ex.getMessage());
+        Map<String, String> error = new HashMap<>();
+        error.put("error", "Invalid or expired JWT token");
+        error.put("message", ex.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
 }
