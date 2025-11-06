@@ -6,6 +6,7 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.ServletException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,19 +50,43 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(SecurityException.class)
+    public boolean handleSecurityException(SecurityException ex) {
+        logger.error("Invalid JWT signature: " + ex.getMessage());
+        return false;
+    }
 
-    @ExceptionHandler({
-            SecurityException.class,
-            MalformedJwtException.class,
-            ExpiredJwtException.class,
-            UnsupportedJwtException.class,
-            IllegalArgumentException.class
-    })
-    public ResponseEntity<?> handleJwtExceptions(Exception ex) {
-        logger.error("JWT Error: {}", ex.getMessage());
-        Map<String, String> error = new HashMap<>();
-        error.put("error", "Invalid or expired JWT token");
-        error.put("message", ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+    @ExceptionHandler(MalformedJwtException.class)
+    public boolean handleMalformedJwtException(MalformedJwtException ex) {
+        logger.error("Invalid JWT token: " + ex.getMessage());
+        return false;
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public boolean handleExpiredJwtException(ExpiredJwtException ex) {
+        logger.error("JWT token is expired: " + ex.getMessage());
+        return false;
+    }
+
+    @ExceptionHandler(UnsupportedJwtException.class)
+    public boolean handleUnsupportedJwtException(UnsupportedJwtException ex) {
+        logger.error("JWT token is unsupported: " + ex.getMessage());
+        return false;
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public boolean handleIllegalArgumentException(IllegalArgumentException ex) {
+        logger.error("JWT claims string is empty: " + ex.getMessage());
+        return false;
+    }
+
+    @ExceptionHandler(ServletException.class)
+    public void handleServletException(ServletException ex) {
+        logger.error("Cannot set user authentication: " + ex);
+    }
+
+    @ExceptionHandler(IOException.class)
+    public void handleIOException(IOException ex) {
+        logger.error("Cannot set user authentication: " + ex);
     }
 }
