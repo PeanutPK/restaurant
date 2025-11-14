@@ -5,6 +5,7 @@ target/
 !**/src/test/**/target/
 .env
 log/
+keystore.p12
 
 ### STS ###
 .apt_generated
