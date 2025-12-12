@@ -36,19 +36,34 @@ export default function Restaurant() {
     navigate('/login')
   }
 
+  async function handleCreateForm() {
+    navigate('/restaurant/create')
+  }
+
   if (loading) {
     return <div style={{ padding: '2rem' }}>Loading...</div>
   }
-  console.log("user", user);
 
   return (
     <div style={{ padding: '2rem' }}>
       <h1>Restaurant List</h1>
       <p>Welcome, <strong>{user.role} {user.username}</strong></p>
 
-      <button onClick={handleLogout} style={{ marginBottom: '1rem' }}>
-        Logout
-      </button>
+      <div style={{ marginBottom: '1rem', display: 'flex' }} >
+        {/*Create*/}
+        <button
+          onClick={handleCreateForm}
+          hidden={ String(user.role).toUpperCase() !== 'ADMIN' }
+          aria-label={'Create Restaurant'}
+          style={{ marginRight: '1rem', backgroundColor: 'green' }}
+        >
+          Create
+        </button>
+        {/*Logout*/}
+        <button onClick={handleLogout} style={{ backgroundColor: 'orange' }}>
+          Logout
+        </button>
+      </div>
       <table border="1" cellPadding="8" style={{ marginTop: '1rem', borderCollapse: 'collapse' }}>
         <thead>
           <tr style={{ background: '#eee' }}>
