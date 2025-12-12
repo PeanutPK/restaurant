@@ -4,12 +4,17 @@ import api from '../api/axios'
 
 export default function Restaurant() {
   const [restaurants, setRestaurants] = useState([])
+  const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
   useEffect(() => {
     async function init() {
       try {
+        // 1. Validate user log in
+        const me = await api.get('/api/auth/me')
+        setUser(me.data)
+        // 2. Fetch restaurant
         const res = await api.get('/api/restaurants')
         setRestaurants(res.data.content)
 
@@ -24,19 +29,32 @@ export default function Restaurant() {
     init()
   }, [navigate])
 
+  async function handleLogout() {
+    try {
+      await api.post('/api/auth/logout')
+    } catch (_) {}
+    navigate('/login')
+  }
+
   if (loading) {
     return <div style={{ padding: '2rem' }}>Loading...</div>
   }
+  console.log("user", user);
 
   return (
     <div style={{ padding: '2rem' }}>
       <h1>Restaurant List</h1>
+      <p>Welcome, <strong>{user.username}</strong></p>
+
+      <button onClick={handleLogout} style={{ marginBottom: '1rem' }}>
+        Logout
+      </button>
       <table border="1" cellPadding="8" style={{ marginTop: '1rem', borderCollapse: 'collapse' }}>
         <thead>
           <tr style={{ background: '#eee' }}>
-            <th>Name</th>
-            <th>Rating</th>
-            <th>Location</th>
+            <th style={{ color: '#000' }}>Name</th>
+            <th style={{ color: '#000' }}>Rating</th>
+            <th style={{ color: '#000' }}>Location</th>
           </tr>
         </thead>
         <tbody>
@@ -49,7 +67,6 @@ export default function Restaurant() {
           ))}
         </tbody>
       </table>
-
     </div>
   )
 }

@@ -1,8 +1,12 @@
 package ku.cs.restaurant.controller;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import ku.cs.restaurant.dto.LoginRequest;
 import ku.cs.restaurant.dto.SignupRequest;
+import ku.cs.restaurant.dto.UserInfoResponse;
 import ku.cs.restaurant.security.JwtUtil;
 import ku.cs.restaurant.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -95,6 +96,27 @@ public class AuthenticationController {
         return ResponseEntity.ok("User registered successfully!");
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        String token = extractTokenFromCookie(request);
+
+        if (token != null)
+            jwtUtils.invalidateToken(token);
+
+        // Clear cookie
+        ResponseCookie cleared = ResponseCookie.from(AUTH_COOKIE_NAME, "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)       // expires immediately
+                .sameSite("None")
+                .build();
+
+        response.addHeader("Set-Cookie", cleared.toString());
+
+        return ResponseEntity.ok("Logged out");
+    }
+
     @PostMapping("/google")
     public ResponseEntity<?> loginWithGoogle(@RequestBody GoogleAuthRequest request) throws Exception {
 
@@ -136,5 +158,30 @@ public class AuthenticationController {
                 ));
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<?> me(HttpServletRequest request) {
+        String token = extractTokenFromCookie(request);
+        if (token == null) {
+            return ResponseEntity.status(401).body("No auth token");
+        }
+
+        String username = jwtUtils.getUsernameFromToken(token);
+        if (username == null) {
+            return ResponseEntity.status(401).body("Invalid token");
+        }
+
+        return ResponseEntity.ok(new UserInfoResponse(username));
+    }
+
+    private String extractTokenFromCookie(HttpServletRequest request) {
+        if (request.getCookies() == null) return null;
+
+        for (Cookie cookie : request.getCookies()) {
+            if (AUTH_COOKIE_NAME.equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
 
 }
