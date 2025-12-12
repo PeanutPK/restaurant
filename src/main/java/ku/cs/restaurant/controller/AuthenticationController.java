@@ -170,7 +170,12 @@ public class AuthenticationController {
             return ResponseEntity.status(401).body("Invalid token");
         }
 
-        return ResponseEntity.ok(new UserInfoResponse(username));
+        User user = userService.getUserByUsername(username);
+        if (user == null) {
+            return ResponseEntity.status(401).body("User not found");
+        }
+
+        return ResponseEntity.ok(new UserInfoResponse(username, user.getRole()));
     }
 
     private String extractTokenFromCookie(HttpServletRequest request) {

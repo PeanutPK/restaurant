@@ -8,8 +8,13 @@ public class UserInfoResponse {
     @Getter
     private String username;
 
-    public UserInfoResponse(String username) {
+    @Setter
+    @Getter
+    private String role;
+
+    public UserInfoResponse(String username, String role) {
         this.username = username;
+        this.role = role;
     }
 
 }
